@@ -81,7 +81,7 @@ do
             nix)     ( set -ex && install_nix ) ;;
             guix)    ( set -ex && install_guix ) ;;
             conda)   ( set -ex && conda activate packs && install_conda ) ;;
-            manual)  ( set -ex && install_manual ) ;;
+            manual)  tmpdir="$(mktemp -d)"; ( set -ex && cd "$tmpdir" && install_manual ); rm -rf "$tmpdir" ;;
             *)       throw_error "Bad install method: $VIA"
         esac || {
             status_message "Failed to install package '$packname'"
