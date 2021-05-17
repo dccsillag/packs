@@ -26,9 +26,28 @@ status_message() {
     echo "$(tput rev)$(tput bold)packs| $1 $(tput sgr0)"
 }
 
+run_action() {
+    if [ "$dry_run" = yes ]
+    then
+        echo "+ $1"
+    else
+        ( set -ex && eval "$1" )
+    fi
+}
+
 [ -z "$PACKS_ROOT" ] && PACKS_ROOT="$HOME/.local/share/packs"
 
 mkdir -p "$PACKS_ROOT"
+
+# Argparse
+dry_run=no
+while getopts d name
+do
+    case $name in
+        d) dry_run=yes; status_message 'Dry run!' ;;
+        ?) echo "Bad argv: $name"; exit 2 ;;
+    esac
+done
 
 # Check whether we have to use sudo or doas
 if command_exists doas
@@ -74,12 +93,12 @@ do
             command_exists "install_$VIA" || exit 2
 
             case "$VIA" in
-                ubuntu)  ( set -ex && install_ubuntu ) ;;
-                manjaro) ( set -ex && install_manjaro ) ;;
-                nix)     ( set -ex && install_nix ) ;;
-                guix)    ( set -ex && install_guix ) ;;
-                conda)   ( set -ex && conda activate packs && install_conda ) ;;
-                manual)  tmpdir="$(mktemp -d)"; ( set -ex && cd "$tmpdir" && install_manual ); rm -rf "$tmpdir" ;;
+                ubuntu)  run_action 'install_ubuntu' ;;
+                manjaro) run_action 'install_manjaro' ;;
+                nix)     run_action 'install_nix' ;;
+                guix)    run_action 'install_guix' ;;
+                conda)   run_action 'conda activate packs && install_conda' ;;
+                manual)  run_action 'tmpdir="$(mktemp -d)"; ( cd "$tmpdir" && install_manual ); rm -rf "$tmpdir"' ;;
                 *)       throw_error "Bad install method: $VIA"
             esac || {
                 status_message "Failed to install package '$packname'"
