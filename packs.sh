@@ -41,26 +41,20 @@ else
     throw_error "No viable sudo/doas binary found"
 fi
 
-# Check if we have root access
-if ask_yn "Do we have root access?"
-then
-    export HAS_ROOT=yes
-
+# Get install methods
+ask_yn "Do we have root access?" && {
     # Get environment
     PLATFORM_NAME="$(lsb_release -is)"
     case "$PLATFORM_NAME" in
-        Ubuntu)       export VIA=ubuntu ;;
-        ManjaroLinux) export VIA=manjaro ;;
+        Ubuntu)       export VIAS="$VIAS ubuntu" ;;
+        ManjaroLinux) export VIAS="$VIAS manjaro" ;;
         *)            throw_error "Unknown system: $PLATFORM_NAME" ;;
     esac
-else
-    export HAS_ROOT=no
-    if   command_exists nix;   then export VIA=nix
-    elif command_exists guix;  then export VIA=guix
-    elif command_exists conda; then export VIA=conda
-    else                            export VIA=manual
-    fi
-fi
+}
+command_exists nix   && export VIAS="$VIAS nix"
+command_exists guix  && export VIAS="$VIAS guix"
+command_exists conda && export VIAS="$VIAS conda"
+export VIAS="$VIAS manual"
 
 # Install packages
 status_message "Installing packages..."
@@ -72,23 +66,33 @@ do
 
     status_message " [$k/$n] Installing '$packname'"
 
-    (
-        . "$packfile"
+    for VIA in $VIAS
+    do
+        (
+            . "$packfile"
 
-        case "$VIA" in
-            ubuntu)  ( set -ex && install_ubuntu ) ;;
-            manjaro) ( set -ex && install_manjaro ) ;;
-            nix)     ( set -ex && install_nix ) ;;
-            guix)    ( set -ex && install_guix ) ;;
-            conda)   ( set -ex && conda activate packs && install_conda ) ;;
-            manual)  tmpdir="$(mktemp -d)"; ( set -ex && cd "$tmpdir" && install_manual ); rm -rf "$tmpdir" ;;
-            *)       throw_error "Bad install method: $VIA"
-        esac || {
-            status_message "Failed to install package '$packname'"
-            ask_yn "Exit?" && exit 1
-            status_message "Continuing..."
-        }
-    ) || exit 1
+            command_exists "install_$VIA" || exit 2
+
+            case "$VIA" in
+                ubuntu)  ( set -ex && install_ubuntu ) ;;
+                manjaro) ( set -ex && install_manjaro ) ;;
+                nix)     ( set -ex && install_nix ) ;;
+                guix)    ( set -ex && install_guix ) ;;
+                conda)   ( set -ex && conda activate packs && install_conda ) ;;
+                manual)  tmpdir="$(mktemp -d)"; ( set -ex && cd "$tmpdir" && install_manual ); rm -rf "$tmpdir" ;;
+                *)       throw_error "Bad install method: $VIA"
+            esac || {
+                status_message "Failed to install package '$packname'"
+                ask_yn "Exit?" && exit 1
+                status_message "Continuing..."
+            }
+        )
+        case $? in
+            0) break ;;
+            1) exit 1 ;;
+            2) status_message "No install function 'install_$VIA'; trying next install method..." ;;
+        esac
+    done
     k=$((k+1))
 done
 status_message " [$n/$n]"
