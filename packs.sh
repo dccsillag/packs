@@ -85,6 +85,7 @@ do
 
     status_message " [$k/$n] Installing '$packname'"
 
+    installed=no
     for VIA in $VIAS
     do
         (
@@ -107,12 +108,39 @@ do
             }
         )
         case $? in
-            0) break ;;
+            0) installed=yes; break ;;
             1) exit 1 ;;
             2) status_message "No install function 'install_$VIA'; trying next install method..." ;;
         esac
     done
+    if [ $installed = yes ]
+    then
+        INSTALL_SUCCEEDED="$INSTALL_SUCCEEDED $packname"
+    else
+        status_message "Failed to install '$packname'; no installation method succeeded."
+        INSTALL_FAILED="$INSTALL_FAILED $packname"
+    fi
     k=$((k+1))
 done
 status_message " [$n/$n]"
 status_message "Finished installing all packages."
+
+echo
+echo "$(tput bold)Summary:$(tput sgr0)"
+echo
+
+[ -n "$INSTALL_SUCCEEDED" ] && {
+    echo "  Install succeeded for:"
+    echo "$(tput setf 2)"
+    echo "$INSTALL_SUCCEEDED" | tr ' ' '\n' | column
+    echo "$(tput sgr0)"
+}
+
+[ -n "$INSTALL_FAILED" ] && {
+    echo "  Install failed for:"
+    echo "$(tput setf 4)"
+    echo "$INSTALL_FAILED" | tr ' ' '\n' | column
+    echo "$(tput sgr0)"
+}
+
+true
