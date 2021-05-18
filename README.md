@@ -54,27 +54,11 @@ More coming soon!
 Just run the `packs.sh` script.
 
 ```sh
-$ ./packs.sh
+./packs.sh
 ```
 
-If you want, you can install it and simply run `packs` instead. See [Installation](#installation).
+If you want, to avoid having to clone this repository, you can also pipe `curl` into `sh`, as follows:
 
 ```sh
-$ packs
-```
-
-## Installation
-
-There is [an `install.sh` script](/install.sh). So, just run
-
-```sh
-./install.sh
-```
-
-Or, alternatively, if you don't want to have to clone this repository beforehand:
-
-```
-# Note that the following works without root access.
-curl -o ~/.local/bin/packs https://raw.githubusercontent.com/dccsillag/packs/master/packs.sh
-chmod +x ~/.local/bin/packs
+curl https://raw.githubusercontent.com/dccsillag/packs/main/packs.sh | sh
 ```
