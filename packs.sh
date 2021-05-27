@@ -35,7 +35,7 @@ run_action() {
     fi
 }
 
-[ -z "$PACKS_ROOT" ] && PACKS_ROOT="$HOME/.local/share/packs"
+[ -z "$PACKS_ROOT" ] && PACKS_ROOT="$HOME/.config/packs"
 
 mkdir -p "$PACKS_ROOT"
 
