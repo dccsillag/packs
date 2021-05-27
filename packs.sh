@@ -1,5 +1,12 @@
 #!/bin/sh
 
+C_RESET='\033[0m'
+C_BOLD='\033[1m'
+C_DIM='\033[2m'
+C_REVERSE='\033[7m'
+C_RED='\033[31m'
+C_GREEN='\033[32m'
+
 command_exists() {
     command -v "$1" > /dev/null 2>&1
 }
@@ -23,7 +30,7 @@ throw_error() {
 }
 
 status_message() {
-    echo "$(tput rev)$(tput bold)packs| $1 $(tput sgr0)"
+    echo "${C_REVERSE}${C_BOLD}packs| $1 ${C_RESET}"
 }
 
 run_action() {
@@ -126,21 +133,21 @@ status_message " [$n/$n]"
 status_message "Finished installing all packages."
 
 echo
-echo "$(tput bold)Summary:$(tput sgr0)"
+echo "${C_BOLD}Summary:${C_RESET}"
 echo
 
 [ -n "$INSTALL_SUCCEEDED" ] && {
     echo "  Install succeeded for:"
-    echo "$(tput setf 2)"
+    echo "$C_GREEN"
     echo "$INSTALL_SUCCEEDED" | tr ' ' '\n' | column
-    echo "$(tput sgr0)"
+    echo "$C_RESET"
 }
 
 [ -n "$INSTALL_FAILED" ] && {
     echo "  Install failed for:"
-    echo "$(tput setf 4)"
+    echo "$C_RED"
     echo "$INSTALL_FAILED" | tr ' ' '\n' | column
-    echo "$(tput sgr0)"
+    echo "$C_RESET"
 }
 
 true
