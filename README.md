@@ -60,5 +60,5 @@ Just run the `packs.sh` script.
 If you want, to avoid having to clone this repository, you can also pipe `curl` into `sh`, as follows:
 
 ```sh
-curl https://raw.githubusercontent.com/dccsillag/packs/main/packs.sh | sh
+bash -c "$(curl https://raw.githubusercontent.com/dccsillag/packs/main/packs.sh)"
 ```
