@@ -165,21 +165,21 @@ status_message " [$n/$n]"
 status_message "Finished installing all packages."
 
 echo
-echo "${C_BOLD}Summary:${C_RESET}"
+echo -e "${C_BOLD}Summary:${C_RESET}"
 echo
 
 [ -n "$INSTALL_SUCCEEDED" ] && {
     echo "  Install succeeded for:"
-    echo "$C_GREEN"
+    echo -e "$C_GREEN"
     echo "$INSTALL_SUCCEEDED" | tr ' ' '\n' | column
-    echo "$C_RESET"
+    echo -e "$C_RESET"
 }
 
 [ -n "$INSTALL_FAILED" ] && {
     echo "  Install failed for:"
-    echo "$C_RED"
+    echo -e "$C_RED"
     echo "$INSTALL_FAILED" | tr ' ' '\n' | column
-    echo "$C_RESET"
+    echo -e "$C_RESET"
 }
 
 true
