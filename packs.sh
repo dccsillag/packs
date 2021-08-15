@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 C_RESET='\033[0m'
 C_BOLD='\033[1m'
@@ -30,7 +30,7 @@ throw_error() {
 }
 
 status_message() {
-    echo "${C_REVERSE}${C_BOLD}packs| $1 ${C_RESET}"
+    echo -e "${C_REVERSE}${C_BOLD}packs| $1 ${C_RESET}"
 }
 
 run_action() {
@@ -59,11 +59,11 @@ do
 done
 shift $((OPTIND - 1))
 # Get which packages we are going to install
-if [ $# -gt 0 ]
+if [ "$#" -gt "0" ]
 then
     packages_to_install="$@"
 else
-    packages_to_install="$(find "$PACKS_ROOT/packages")"
+    packages_to_install="$(ls "$PACKS_ROOT/packages")"
 fi
 
 # Check whether we have to use sudo or doas
@@ -95,11 +95,11 @@ export VIAS="$VIAS manual"
 
 # Install packages
 status_message "Installing packages..."
-n="$(find "$PACKS_ROOT/packages" -type f | wc -l)"
+n="$(echo "$packages_to_install" | wc -l)"
 k=0
-for packfile in "$packages_to_install"
+echo "$packages_to_install" | while read -r packname
 do
-    packname="$(basename "$packfile")"
+    packfile="$PACKS_ROOT/packages/$packname"
 
     status_message " [$k/$n] Installing '$packname'"
 
