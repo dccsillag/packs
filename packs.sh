@@ -97,7 +97,7 @@ export VIAS="$VIAS manual"
 status_message "Installing packages..."
 n="$(echo "$packages_to_install" | wc -l)"
 k=0
-echo "$packages_to_install" | while read -r packname
+while read -r packname
 do
     packfile="$PACKS_ROOT/packages/$packname"
 
@@ -160,7 +160,7 @@ do
         INSTALL_FAILED="$INSTALL_FAILED $packname"
     fi
     k=$((k+1))
-done
+done <<< "$packages_to_install"
 status_message " [$n/$n]"
 status_message "Finished installing all packages."
 
