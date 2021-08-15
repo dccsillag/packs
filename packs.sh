@@ -48,13 +48,16 @@ mkdir -p "$PACKS_ROOT"
 
 # Argparse
 dry_run=no
-while getopts d name
+force_install=no
+while getopts df name
 do
     case $name in
         d) dry_run=yes; status_message 'Dry run!' ;;
+        f) force_install=yes; status_message 'Forcing install!' ;;
         ?) echo "Bad argv: $name"; exit 2 ;;
     esac
 done
+# TODO get list of packages to install
 
 # Check whether we have to use sudo or doas
 if command_exists doas
@@ -93,35 +96,54 @@ do
 
     status_message " [$k/$n] Installing '$packname'"
 
-    installed=no
-    for VIA in $VIAS
-    do
-        (
-            . "$packfile"
+    (
+        . "$packfile"
 
-            command_exists "install_$VIA" || exit 2
+        command_exists check || {
+            status_message "No 'check' function defined! Assuming that package is not installed."
+            exit 0
+        }
 
-            case "$VIA" in
-                ubuntu)  run_action 'install_ubuntu' ;;
-                manjaro) run_action 'install_manjaro' ;;
-                nix)     run_action 'install_nix' ;;
-                guix)    run_action 'install_guix' ;;
-                pip)     run_action 'install_pip' ;;
-                conda)   run_action 'conda activate packs && install_conda' ;;
-                manual)  run_action 'tmpdir="$(mktemp -d)"; ( cd "$tmpdir" && install_manual ); rm -rf "$tmpdir"' ;;
-                *)       throw_error "Bad install method: $VIA"
-            esac || {
-                status_message "Failed to install package '$packname'"
-                ask_yn "Exit?" && exit 1
-                status_message "Continuing..."
-            }
-        )
-        case $? in
-            0) installed=yes; break ;;
-            1) exit 1 ;;
-            2) status_message "No install function 'install_$VIA'; trying next install method..." ;;
-        esac
-    done
+        [ "$force_install" = no ] && check && {
+            status_message "Package is already installed; skipping"
+            exit 1
+        }
+    )
+    if [ $? -eq 1 ]
+    then
+        installed=yes
+    else
+        installed=no
+        for VIA in $VIAS
+        do
+            (
+                . "$packfile"
+
+                command_exists "install_$VIA" || exit 2
+
+                case "$VIA" in
+                    ubuntu)  run_action 'install_ubuntu' ;;
+                    manjaro) run_action 'install_manjaro' ;;
+                    nix)     run_action 'install_nix' ;;
+                    guix)    run_action 'install_guix' ;;
+                    pip)     run_action 'install_pip' ;;
+                    conda)   run_action 'conda activate packs && install_conda' ;;
+                    manual)  run_action 'tmpdir="$(mktemp -d)"; ( cd "$tmpdir" && install_manual ); rm -rf "$tmpdir"' ;;
+                    *)       throw_error "Bad install method: $VIA"
+                esac || {
+                    status_message "Failed to install package '$packname'"
+                    ask_yn "Exit?" && exit 1
+                    status_message "Continuing..."
+                }
+            )
+            case $? in
+                0) installed=yes; break ;;
+                1) exit 1 ;;
+                2) status_message "No install function 'install_$VIA'; trying next install method..." ;;
+            esac
+        done
+    fi
+
     if [ $installed = yes ]
     then
         INSTALL_SUCCEEDED="$INSTALL_SUCCEEDED $packname"
