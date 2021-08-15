@@ -115,6 +115,7 @@ do
             status_message "Package is already installed; skipping"
             exit 1
         }
+        exit 0
     )
     if [ $? -eq 1 ]
     then
