@@ -79,6 +79,7 @@ ask_yn "Do we have root access?" && {
 }
 command_exists nix   && export VIAS="$VIAS nix"
 command_exists guix  && export VIAS="$VIAS guix"
+command_exists pip   && export VIAS="$VIAS pip"
 command_exists conda && export VIAS="$VIAS conda"
 export VIAS="$VIAS manual"
 
@@ -105,6 +106,7 @@ do
                 manjaro) run_action 'install_manjaro' ;;
                 nix)     run_action 'install_nix' ;;
                 guix)    run_action 'install_guix' ;;
+                pip)     run_action 'install_pip' ;;
                 conda)   run_action 'conda activate packs && install_conda' ;;
                 manual)  run_action 'tmpdir="$(mktemp -d)"; ( cd "$tmpdir" && install_manual ); rm -rf "$tmpdir"' ;;
                 *)       throw_error "Bad install method: $VIA"

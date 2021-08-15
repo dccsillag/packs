@@ -44,6 +44,7 @@ Here is a list of the functions that `packs` knows how to use in these package s
 | `install_manjaro`    | Installs a package for a Manjaro system; root access is assumed to be required.                              |
 | `install_nix`        | Installs a package using Nix.                                                                                |
 | `install_guix`       | Installs a package using GNU Guix.                                                                           |
+| `install_pip`        | Installs a package using Pip.                                                                                |
 | `install_conda`      | Installs a package using Anaconda, in an isolated environment called `packs`.                                |
 | `install_manual`     | Installs a package using only shell commands. This is used in the case that no package manager is available. |
 
