@@ -57,7 +57,14 @@ do
         ?) echo "Bad argv: $name"; exit 2 ;;
     esac
 done
-# TODO get list of packages to install
+shift $((OPTIND - 1))
+# Get which packages we are going to install
+if [ $# -gt 0 ]
+then
+    packages_to_install="$@"
+else
+    packages_to_install="$(find "$PACKS_ROOT/packages")"
+fi
 
 # Check whether we have to use sudo or doas
 if command_exists doas
@@ -90,7 +97,7 @@ export VIAS="$VIAS manual"
 status_message "Installing packages..."
 n="$(find "$PACKS_ROOT/packages" -type f | wc -l)"
 k=0
-for packfile in "$PACKS_ROOT"/packages/*
+for packfile in "$packages_to_install"
 do
     packname="$(basename "$packfile")"
 
